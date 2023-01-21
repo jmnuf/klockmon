@@ -9,7 +9,7 @@ import { timersRouter } from "./routers/timers";
  */
 export const appRouter = createTRPCRouter({
 	example: exampleRouter,
-	timer: timersRouter,
+	timers: timersRouter,
 });
 
 // export type definition of API

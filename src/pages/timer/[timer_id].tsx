@@ -32,7 +32,7 @@ const TimerPage: NextPage<
 			</>
 		);
 	}
-	const q = api.timer.getById.useQuery({ id: timerId });
+	const q = api.timers.getById.useQuery({ id: timerId });
 	if (!q.data) {
 		return (
 			<>

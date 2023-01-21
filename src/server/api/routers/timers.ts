@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const timersRouter = createTRPCRouter({
 	getById: publicProcedure
@@ -18,7 +18,7 @@ export const timersRouter = createTRPCRouter({
 				return {
 					found: false,
 					data: null,
-				};
+				} as const;
 			}
 
 			const data = {
@@ -32,7 +32,30 @@ export const timersRouter = createTRPCRouter({
 			return {
 				found: true,
 				data,
-			};
+			} as const;
+		}),
+
+	create: protectedProcedure
+		.input(
+			z.object({
+				title: z.string().min(1),
+				duration: z.number().min(60),
+				startAt: z.date().optional(),
+			})
+		)
+		.mutation(async ({ input, ctx }) => {
+			const userId = ctx.session.user.id;
+			const timer = await ctx.prisma.timers.create({
+				data: {
+					title: input.title,
+					duration: input.duration,
+					creatorId: userId,
+					startTime: input.startAt,
+				},
+			});
+			if (!timer) {
+				return { created: false, id: null } as const;
+			}
+			return { created: true, id: timer.id } as const;
 		}),
 });
-
