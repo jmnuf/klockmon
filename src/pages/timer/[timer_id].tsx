@@ -5,6 +5,7 @@ import type {
 } from "next";
 import Head from "next/head";
 import Body from "../../components/body";
+import H1 from "../../components/h1";
 import { api } from "../../utils/api";
 
 const TimerPage: NextPage<
@@ -25,7 +26,7 @@ const TimerPage: NextPage<
 					/>
 				</Head>
 				<Body>
-					<h1>Invalid Timer Request</h1>
+					<H1>Invalid Timer Request</H1>
 					<p>There is no known timer here...</p>
 				</Body>
 			</>
@@ -37,9 +38,10 @@ const TimerPage: NextPage<
 			<>
 				<Head>
 					<title>Check Timer</title>
+					<meta name="description" content="Countdown alongside others" />
 				</Head>
 				<Body>
-					<h1>Opening timer...</h1>
+					<H1>Opening timer...</H1>
 				</Body>
 			</>
 		);
@@ -51,9 +53,10 @@ const TimerPage: NextPage<
 			<>
 				<Head>
 					<title>Check Timer</title>
+					<meta name="description" content="Countdown alongside others" />
 				</Head>
 				<Body>
-					<h1>No Timer Found</h1>
+					<H1>No Timer Found</H1>
 					<p>{`The requested timer of id ${timerId} doesn't exist`}</p>
 				</Body>
 			</>
@@ -68,13 +71,16 @@ const TimerPage: NextPage<
 	return (
 		<>
 			<Head>
-				<title>Check Timer | { timer.title }</title>
+				<title>Check Timer | {timer.title}</title>
+				<meta name="description" content="Countdown alongside others" />
 			</Head>
 			<Body>
-				<h1>{timer.title} Timer</h1>
+				<H1>{timer.title} Timer</H1>
 				<p>
-					<strong>Hours:</strong> {diffDate.getHours()}<br />
-					<strong>Minutes:</strong> {diffDate.getMinutes()}<br />
+					<strong>Hours:</strong> {diffDate.getHours()}
+					<br />
+					<strong>Minutes:</strong> {diffDate.getMinutes()}
+					<br />
 					<strong>Seconds:</strong> {diffDate.getSeconds()}
 				</p>
 			</Body>
