@@ -1,0 +1,6 @@
+{
+	"endOfLine": "crlf",
+	"useTabs": true,
+	"semi": true,
+	"trailingComma": "es5"
+}
