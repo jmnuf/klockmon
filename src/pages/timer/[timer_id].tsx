@@ -4,15 +4,83 @@ import type {
 	NextPage,
 } from "next";
 import Head from "next/head";
+import type { PropsWithChildren} from "react";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 import Body from "../../components/body";
 import H1 from "../../components/h1";
 import { api } from "../../utils/api";
 import { millisToReadableTime } from "../../utils/ms-to-time";
 
-const TimerPage: NextPage<
-	InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ timerId }) => {
+const TrueFalseyScheme = z
+	.string()
+	.optional()
+	.transform((val) => {
+		if (!val) {
+			return false;
+		}
+		switch (val) {
+			case "true":
+				return true;
+			default:
+				return false;
+		}
+	});
+
+const UrlQuerySchema = z.object({
+	duration: TrueFalseyScheme,
+	circle: TrueFalseyScheme,
+});
+
+type UrlQueryType = z.infer<typeof UrlQuerySchema>;
+
+export const getServerSideProps: GetServerSideProps<{
+	timerId: string | null;
+	query: UrlQueryType;
+	// eslint-disable-next-line @typescript-eslint/require-await
+}> = async ({ params, query }) => {
+	const urlQueryParse = UrlQuerySchema.safeParse(query);
+	let timerId: string | null = null;
+	if (params) {
+		if (typeof params.timer_id === "string") {
+			timerId = params.timer_id.trim();
+		} else if (
+			typeof params.timer_id == "object" &&
+			Array.isArray(params.timer_id)
+		) {
+			const item = params.timer_id[0];
+			if (typeof item == "string") {
+				timerId = item.trim();
+			}
+		}
+	}
+	const parsedQuery = urlQueryParse.success
+		? urlQueryParse.data
+		: {
+				duration: false,
+				circle: false,
+		  };
+	return {
+		props: {
+			timerId,
+			query: parsedQuery,
+		},
+	};
+};
+
+type ServerSideProps = InferGetServerSidePropsType<typeof getServerSideProps>;
+
+const BaseHeader: React.FC<{ title: string, description:string }&PropsWithChildren> = ({ title, description, children }) => {
+	return (
+		<Head>
+			<title>{title}</title>
+			<meta name="description" content={description} />
+			{children}
+		</Head>
+	)
+}
+
+const TimerPage: NextPage<ServerSideProps> = ({ timerId, query }) => {
 	const [now, setNow] = useState(Date.now());
 	useEffect(() => {
 		setInterval(() => {
@@ -72,20 +140,26 @@ const TimerPage: NextPage<
 		);
 	}
 	const timer = result.data;
-	const endTime = timer.startedAt.valueOf() + timer.duration;
+	const startTime = timer.startedAt.valueOf();
+	const endTime = startTime + timer.duration;
 
-	const diffMillis = (endTime - now);
-	const diffDate = millisToReadableTime(diffMillis);
+	if (now >= endTime) {
+		return (<>
+			<BaseHeader title={`Check Timer | ${timer.title}`} description="Countdown alongside others" />
+			<Body>
+				<H1 className="font-sans">{`Klock-"${timer.title}"-mon`}</H1>
+				<KlockmonSection title="Kountdown" subtitle="Completed">
+					<p>Finished at {new Date(endTime).toLocaleString()}</p>
+					<p>Currently {new Date(now).toLocaleString()}</p>
+				</KlockmonSection>
+			</Body>
+		</>)
+	}
 
-	if (diffDate.hours < 0) {
-		diffDate.hours = 0;
-	}
-	if (diffDate.minutes < 0) {
-		diffDate.minutes = 0;
-	}
-	if (diffDate.seconds < 0) {
-		diffDate.seconds = 0;
-	}
+	const diffMillis = endTime - now;
+	const nowDate = new Date(now).toLocaleDateString();
+	const diffTime = millisToReadableTime(diffMillis);
+	const duration = millisToReadableTime(timer.duration);
 
 	return (
 		<>
@@ -94,11 +168,12 @@ const TimerPage: NextPage<
 				<meta name="description" content="Countdown alongside others" />
 			</Head>
 			<Body>
-				<H1 className="font-sans">{`"${timer.title}"`}</H1>
-				<h2 className="text-2xl font-semibold pb-2 font-sans">Timer/Countdown</h2>
-				<h3 className="text-xl font-semibold pb-2 font-mono">
-					{diffDate.time}
-				</h3>
+				<H1 className="font-sans">{`Klock-"${timer.title}"-mon`}</H1>
+				<KlockmonSection title="Kountdown" subtitle={`${nowDate}, ${diffTime.time}`} />
+				{query.duration && (
+					<KlockmonSection title="Duration" subtitle={duration.time} />
+				)}
+
 			</Body>
 		</>
 	);
@@ -106,28 +181,17 @@ const TimerPage: NextPage<
 
 export default TimerPage;
 
-export const getServerSideProps: GetServerSideProps<{
-	timerId: string | null;
-	// eslint-disable-next-line @typescript-eslint/require-await
-}> = async ({ params }) => {
-	let timerId: string | null = null;
-	if (params) {
-		if (typeof params.timer_id === "string") {
-			timerId = params.timer_id.trim();
-		} else if (
-			typeof params.timer_id == "object" &&
-			Array.isArray(params.timer_id)
-		) {
-			const item = params.timer_id[0];
-			if (typeof item == "string") {
-				timerId = item.trim();
-			}
-		}
-	}
-	return {
-		props: {
-			timerId,
-		},
-	};
+const KlockmonSection: React.FC<
+	{ title: string; subtitle?: string } & PropsWithChildren
+> = ({ title, subtitle, children }) => {
+	return (
+		<div>
+			<h2 className="pb-2 font-sans text-2xl font-semibold">{title}</h2>
+			{subtitle && (
+				<h3 className="pb-2 font-mono text-xl font-semibold">{subtitle}</h3>
+			)}
+			{children}
+		</div>
+	);
 };
 

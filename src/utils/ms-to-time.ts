@@ -16,9 +16,14 @@ export function millisToReadableTime(millis: number) {
 		minutes: absoluteMinutes,
 		seconds: absoluteSeconds,
 		get time() {
-			const h = this.hours > 9 ? `${this.hours}` : `0${this.hours}`;
-			const m = this.minutes > 9 ? `${this.minutes}` : `0${this.minutes}`;
-			const s = this.seconds > 9 ? `${this.seconds}` : `0${this.seconds}`;
+			const hours = this.hours < 0 ? 0 : this.hours;
+			const h = hours > 9 ? `${hours}` : `0${hours}`;
+
+			const minutes = this.minutes < 0 ? 0 : this.minutes;
+			const m = minutes > 9 ? `${minutes}` : `0${minutes}`;
+
+			const seconds = this.seconds < 0 ? 0 : this.seconds;
+			const s = seconds > 9 ? `${seconds}` : `0${seconds}`;
 
 			return `${h} : ${m} : ${s}`;
 		},
