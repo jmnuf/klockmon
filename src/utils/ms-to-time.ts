@@ -27,6 +27,19 @@ export function millisToReadableTime(millis: number) {
 
 			return `${h} : ${m} : ${s}`;
 		},
+		get readable() {
+			let readable = "";
+			if (this.hours > 0) {
+				readable += `${this.hours} hours `;
+			}
+			if (this.minutes > 0) {
+				readable += `${this.minutes} minutes `;
+			}
+			if (this.seconds > 0) {
+				readable += `${this.seconds} seconds`;
+			}
+			return readable.trim();
+		},
 	};
 }
 

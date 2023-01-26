@@ -142,13 +142,14 @@ const TimerPage: NextPage<ServerSideProps> = ({ timerId, query }) => {
 	const timer = result.data;
 	const startTime = timer.startedAt.valueOf();
 	const endTime = startTime + timer.duration;
+	const duration = millisToReadableTime(timer.duration);
 
 	if (now >= endTime) {
 		return (<>
 			<BaseHeader title={`Check Timer | ${timer.title}`} description="Countdown alongside others" />
 			<Body>
 				<H1 className="font-sans">{`Klock-"${timer.title}"-mon`}</H1>
-				<KlockmonSection title="Kountdown" subtitle="Completed">
+				<KlockmonSection title="Kountdown" subtitle={`Completed klockmon of ${duration.readable}`}>
 					<p>Finished at {new Date(endTime).toLocaleString()}</p>
 					<p>Currently {new Date(now).toLocaleString()}</p>
 				</KlockmonSection>
@@ -159,7 +160,6 @@ const TimerPage: NextPage<ServerSideProps> = ({ timerId, query }) => {
 	const diffMillis = endTime - now;
 	const nowDate = new Date(now).toLocaleDateString();
 	const diffTime = millisToReadableTime(diffMillis);
-	const duration = millisToReadableTime(timer.duration);
 
 	return (
 		<>
