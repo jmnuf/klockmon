@@ -9,7 +9,7 @@ export function millisToReadableTime(millis: number) {
 
 	//Get remainder from minutes and convert to seconds
 	const seconds = (minutes - absoluteMinutes) * 60;
-	const absoluteSeconds = Math.floor(seconds * 1000) / 1000;
+	const absoluteSeconds = Math.floor(seconds);
 
 	return {
 		hours: absoluteHours,
@@ -18,10 +18,7 @@ export function millisToReadableTime(millis: number) {
 		get time() {
 			const h = this.hours > 9 ? `${this.hours}` : `0${this.hours}`;
 			const m = this.minutes > 9 ? `${this.minutes}` : `0${this.minutes}`;
-			const s =
-				this.seconds > 9
-					? `${this.seconds.toFixed(2)}`
-					: `0${this.seconds.toFixed(2)}`;
+			const s = this.seconds > 9 ? `${this.seconds}` : `0${this.seconds}`;
 
 			return `${h} : ${m} : ${s}`;
 		},
