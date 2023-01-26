@@ -4,13 +4,22 @@ import type {
 	NextPage,
 } from "next";
 import Head from "next/head";
+import { useEffect, useState } from "react";
 import Body from "../../components/body";
 import H1 from "../../components/h1";
 import { api } from "../../utils/api";
+import { millisToReadableTime } from "../../utils/ms-to-time";
 
 const TimerPage: NextPage<
 	InferGetServerSidePropsType<typeof getServerSideProps>
 > = ({ timerId }) => {
+	const [now, setNow] = useState(Date.now());
+	useEffect(() => {
+		setInterval(() => {
+			setNow(Date.now());
+		}, 500);
+	}, []);
+
 	if (!timerId) {
 		return (
 			<>
@@ -63,10 +72,20 @@ const TimerPage: NextPage<
 		);
 	}
 	const timer = result.data;
-	const now = Date.now();
+	const endTime = timer.startedAt.valueOf() + timer.duration;
 
-	const diffMillis = timer.startedAt.valueOf() + timer.duration - now;
-	const diffDate = new Date(diffMillis);
+	const diffMillis = (endTime - now);
+	const diffDate = millisToReadableTime(diffMillis);
+
+	if (diffDate.hours < 0) {
+		diffDate.hours = 0;
+	}
+	if (diffDate.minutes < 0) {
+		diffDate.minutes = 0;
+	}
+	if (diffDate.seconds < 0) {
+		diffDate.seconds = 0;
+	}
 
 	return (
 		<>
@@ -75,14 +94,11 @@ const TimerPage: NextPage<
 				<meta name="description" content="Countdown alongside others" />
 			</Head>
 			<Body>
-				<H1>{timer.title} Timer</H1>
-				<p>
-					<strong>Hours:</strong> {diffDate.getHours()}
-					<br />
-					<strong>Minutes:</strong> {diffDate.getMinutes()}
-					<br />
-					<strong>Seconds:</strong> {diffDate.getSeconds()}
-				</p>
+				<H1 className="font-sans">{`"${timer.title}"`}</H1>
+				<h2 className="text-2xl font-semibold pb-2 font-sans">Timer/Countdown</h2>
+				<h3 className="text-xl font-semibold pb-2 font-mono">
+					{diffDate.time}
+				</h3>
 			</Body>
 		</>
 	);
