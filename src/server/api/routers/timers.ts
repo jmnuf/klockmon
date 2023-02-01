@@ -11,23 +11,22 @@ export const timersRouter = createTRPCRouter({
 		.query(async ({ input, ctx }) => {
 			const id = input.id;
 			const db = ctx.prisma.timers;
-			const timer = await db.findUnique({
+			const data = await db.findUnique({
+				select: {
+					id: true,
+					createdAt: true,
+					title: true,
+					duration: true,
+					startTime: true,
+				},
 				where: { id },
 			});
-			if (!timer) {
+			if (!data) {
 				return {
 					found: false,
 					data: null,
 				} as const;
 			}
-
-			const data = {
-				id,
-				title: timer.title,
-				createdAt: timer.createdAt,
-				duration: timer.duration,
-				startedAt: timer.startTime,
-			};
 
 			return {
 				found: true,

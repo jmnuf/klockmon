@@ -140,7 +140,7 @@ const TimerPage: NextPage<ServerSideProps> = ({ timerId, query }) => {
 		);
 	}
 	const timer = result.data;
-	const startTime = timer.startedAt.valueOf();
+	const startTime = timer.startTime.valueOf();
 	const endTime = startTime + timer.duration;
 	const duration = millisToReadableTime(timer.duration);
 
